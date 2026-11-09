@@ -1,0 +1,756 @@
+<!doctype html>
+<html lang="nb">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Båtverksted">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}</style>
+</head>
+<body>
+<title>Williams Båtverksted</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Big+Shoulders+Stencil+Display:wght@700;800&display=swap">
+<style>
+/* Layout: én kolonne på telefonen. Mørk fjord som gulv, aluminiumsplater som arbeidsflater, signalgult for handling, sveiseblått for "riktig". */
+:root{
+  --sea:#0C2230; --sea2:#123246; --sea3:#1A4560; --line:#28566F;
+  --alu:#E6ECEF; --alu2:#C8D3D9; --ink:#122431;
+  --sig:#F2C230; --sig-ink:#2A2100;
+  --weld:#6CD3FF; --warm:#F29A5C;
+  --text:#ECF3F6; --mute:#9DB6C3;
+  --display:"Big Shoulders Stencil Display", "Arial Narrow", Impact, sans-serif;
+  --body:"Atkinson Hyperlegible", -apple-system, "Segoe UI", Roboto, sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--sea);color:var(--text);font-family:var(--body);font-size:18px;line-height:1.45;-webkit-tap-highlight-color:transparent}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--sig);outline-offset:2px}
+.app{max-width:540px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px 110px}
+[hidden]{display:none!important}
+h1,h2,h3{font-family:var(--display);font-weight:800;letter-spacing:.02em;margin:0;text-wrap:balance;line-height:1.05}
+.eyebrow{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);font-weight:700}
+.num{font-variant-numeric:tabular-nums}
+
+/* Topp */
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:6px 14px}
+.top h1{font-size:34px;color:var(--sig)}
+.count{text-align:right}
+.count b{font-family:var(--display);font-size:34px;display:block;line-height:1;color:var(--text)}
+.count span{font-size:13px;color:var(--mute);white-space:nowrap}
+
+/* Båtkort på forsiden */
+.dock{background:linear-gradient(180deg,var(--sea2),var(--sea));border:1px solid var(--line);border-radius:14px;padding:12px 14px 14px;display:grid;gap:10px}
+.dock svg{width:100%;height:auto;display:block}
+.dock-row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.stars-big{font-family:var(--display);font-size:24px}
+.stars-big small{font-family:var(--body);font-size:14px;color:var(--mute);font-weight:400}
+.bar{height:10px;border-radius:6px;background:var(--sea3);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--sig);border-radius:6px;transition:width .6s}
+.shift{display:flex;gap:6px;align-items:center;font-size:15px;color:var(--mute)}
+.shift i{width:14px;height:14px;border-radius:50%;border:2px solid var(--mute);display:inline-block}
+.shift i.on{background:var(--weld);border-color:var(--weld)}
+
+.go{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;margin-block:16px 8px;background:var(--sig);color:var(--sig-ink);border-radius:14px;padding:16px 18px;text-align:left;min-height:72px;box-shadow:0 4px 0 #B8901C}
+.go:active{transform:translateY(3px);box-shadow:0 1px 0 #B8901C}
+.go b{font-family:var(--display);font-size:28px;display:block;line-height:1}
+.go span{font-size:15px}
+.go svg{flex:none}
+
+.section-title{display:flex;justify-content:space-between;align-items:baseline;margin-block:22px 10px}
+.section-title h2{font-size:24px}
+.section-title span{font-size:14px;color:var(--mute)}
+
+/* Stasjoner */
+.stations{display:grid;gap:10px}
+.st{background:var(--sea2);border:1px solid var(--line);border-radius:14px;padding:12px;display:grid;grid-template-columns:44px 1fr;gap:4px 12px;align-items:center}
+.st .ic{width:44px;height:44px;border-radius:10px;background:var(--sea3);display:grid;place-items:center;grid-row:span 2;color:var(--sig)}
+.st .ic svg{width:26px;height:26px}
+.st h3{font-size:22px}
+.st .sub{font-size:15px;color:var(--mute);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.tag{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:5px;border:1px solid currentColor}
+.tag.d1{color:var(--weld)} .tag.d2{color:var(--sig)}
+.lvls{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+.lv{min-height:54px;border-radius:10px;background:var(--sea3);display:grid;place-items:center;gap:2px;padding:6px 4px;font-size:14px;font-weight:700;line-height:1.1}
+.lv .s{width:18px;height:18px}
+.lv.done{background:var(--sig);color:var(--sig-ink)}
+.lv.locked{opacity:.4}
+.lv:active{transform:scale(.97)}
+
+.exam-card{margin-top:22px;background:var(--alu);color:var(--ink);border-radius:14px;padding:16px;display:grid;gap:8px}
+.exam-card h2{font-size:26px}
+.exam-card p{margin:0;font-size:16px}
+.btn{min-height:54px;border-radius:12px;padding:12px 18px;font-weight:700;font-size:18px;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn.dark{background:var(--ink);color:var(--alu)}
+.btn.sig{background:var(--sig);color:var(--sig-ink)}
+.btn.ghost{border:2px solid var(--line);color:var(--text)}
+.btn.full{width:100%}
+
+/* Bunnmeny */
+.nav{position:fixed;left:0;right:0;bottom:0;background:var(--sea2);border-top:1px solid var(--line);display:flex;justify-content:center;padding:8px max(16px,env(safe-area-inset-right,0px)) calc(8px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));z-index:5}
+.nav .in{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;width:100%;max-width:540px}
+.nav button{display:grid;place-items:center;gap:2px;font-size:13px;font-weight:700;color:var(--mute);padding:6px;border-radius:10px;min-height:52px}
+.nav button svg{width:24px;height:24px}
+.nav button.on{color:var(--sig);background:var(--sea3)}
+
+/* Runde */
+.rtop{display:flex;align-items:center;gap:10px;padding-block:4px 12px}
+.x{width:44px;height:44px;border-radius:50%;background:var(--sea2);display:grid;place-items:center;flex:none}
+.pips{display:flex;gap:5px;flex:1}
+.pips i{flex:1;height:10px;border-radius:5px;background:var(--sea3)}
+.pips i.ok{background:var(--weld)} .pips i.no{background:var(--warm)} .pips i.cur{background:var(--mute)}
+.combo{font-family:var(--display);font-size:20px;color:var(--weld);min-width:44px;text-align:right}
+.rlabel{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.rlabel b{font-family:var(--display);font-size:22px}
+.plate{position:relative;background:
+  linear-gradient(135deg,rgba(255,255,255,.55),rgba(255,255,255,0) 40%),
+  repeating-linear-gradient(45deg,rgba(18,36,49,.035) 0 6px,transparent 6px 14px),
+  repeating-linear-gradient(-45deg,rgba(18,36,49,.035) 0 6px,transparent 6px 14px),
+  var(--alu);color:var(--ink);border-radius:14px;padding:18px 16px 16px;font-size:20px;line-height:1.5;box-shadow:inset 0 0 0 1px rgba(255,255,255,.6),0 2px 0 var(--alu2)}
+.plate::before,.plate::after{content:"";position:absolute;top:8px;width:8px;height:8px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fff,#8C9AA3)}
+.plate::before{left:8px}.plate::after{right:8px}
+.plate b{font-weight:700}
+.plate table{border-collapse:collapse;font-size:15px;margin-top:8px;width:100%}
+.plate td,.plate th{border:1px solid #9FB0BA;padding:3px 6px;text-align:center}
+.plate th{background:#D3DDE2}
+.tools{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.tool{display:inline-flex;align-items:center;gap:6px;background:var(--ink);color:var(--alu);border-radius:10px;padding:8px 12px;font-size:15px;font-weight:700;min-height:44px}
+.tool svg{width:20px;height:20px}
+.tipbox{background:#FFF4CC;border:2px dashed #C99A1C;border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:17px;line-height:1.45;display:grid;gap:4px}
+.tipbox .rule{display:block;font-family:var(--display);font-size:26px;line-height:1.05;color:var(--ink);font-weight:800;margin-bottom:2px}
+.tipbox span{font-size:12px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:#7A5A00}
+.steps{margin:12px 0 0;padding:0;list-style:none;display:grid;gap:6px}
+.steps li{background:#fff;border-left:5px solid var(--sig);border-radius:6px;padding:8px 10px;font-size:18px}
+.steps li.ans{border-left-color:var(--weld);font-weight:700}
+
+.answers{display:grid;gap:10px;margin-top:16px}
+.opt{min-height:64px;border-radius:12px;background:var(--sea2);border:2px solid var(--line);font-size:24px;font-weight:700;padding:10px 14px;text-align:center;font-variant-numeric:tabular-nums}
+.opt:active{transform:scale(.98)}
+.opt.ok{background:var(--weld);color:var(--ink);border-color:var(--weld)}
+.opt.no{opacity:.35;text-decoration:line-through}
+.inrow{display:flex;gap:8px;align-items:stretch}
+.inrow input{flex:1;min-width:0;font:inherit;font-size:28px;font-weight:700;padding:10px 14px;border-radius:12px;border:2px solid var(--line);background:var(--sea2);color:var(--text);font-variant-numeric:tabular-nums}
+.inrow .unit{display:grid;place-items:center;font-size:20px;color:var(--mute);padding:0 4px;min-width:40px}
+.hint-small{font-size:14px;color:var(--mute);margin-top:6px}
+
+.fb{position:fixed;left:0;right:0;bottom:0;z-index:20;padding:16px max(16px,env(safe-area-inset-right,0px)) calc(16px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));transform:translateY(110%);transition:transform .25s ease-out}
+.fb.show{transform:none}
+.fb .in{max-width:540px;margin:0 auto;display:grid;gap:10px}
+.fb.good{background:var(--weld);color:var(--ink)}
+.fb.bad{background:var(--warm);color:#2B1406}
+.fb h3{font-size:30px}
+.fb p{margin:0;font-size:17px}
+.fb .btn{background:var(--ink);color:var(--alu)}
+
+/* Gnister */
+.spark{position:fixed;width:6px;height:6px;border-radius:50%;background:var(--weld);box-shadow:0 0 8px 2px var(--weld);pointer-events:none;z-index:30;animation:spark .7s ease-out forwards}
+.spark.y{background:#FFF3B0;box-shadow:0 0 8px 2px var(--sig)}
+@keyframes spark{to{transform:translate(var(--dx),var(--dy)) scale(.2);opacity:0}}
+
+/* Resultat */
+.result{display:grid;gap:14px;text-align:center;padding-top:16px}
+.result h2{font-size:44px;color:var(--sig)}
+.result .score{font-size:20px}
+.rstars{display:flex;justify-content:center;gap:10px}
+.rstars svg{width:52px;height:52px}
+.newpart{background:var(--sea2);border:1px solid var(--line);border-radius:14px;padding:12px;display:grid;gap:6px}
+.newpart svg{width:100%;height:auto}
+.newpart b{font-family:var(--display);font-size:24px;color:var(--weld)}
+.weak{font-size:16px;color:var(--mute);text-align:left;background:var(--sea2);border-radius:12px;padding:12px}
+
+/* Båt-fane */
+.parts{display:grid;gap:8px;margin-top:12px}
+.part{display:flex;justify-content:space-between;gap:10px;align-items:center;background:var(--sea2);border-radius:10px;padding:10px 12px;font-size:16px}
+.part.on{color:var(--text)} .part.off{color:var(--mute)}
+.part b{font-variant-numeric:tabular-nums;white-space:nowrap}
+.stat{display:grid;grid-template-columns:1fr auto;gap:4px 10px;font-size:15px;background:var(--sea2);border-radius:12px;padding:12px;margin-top:12px}
+.stat span:nth-child(even){font-variant-numeric:tabular-nums;color:var(--mute);text-align:right}
+
+/* Verktøykasse */
+.fcard{background:var(--alu);color:var(--ink);border-radius:12px;padding:12px 14px;margin-top:10px}
+.fcard h3{font-size:22px}
+.fcard p{margin:6px 0 0;font-size:17px}
+.fcard code{font-family:var(--body);font-weight:700;background:#fff;border-radius:5px;padding:1px 6px}
+.tips{margin:8px 0 0;padding-left:20px;font-size:17px;display:grid;gap:4px}
+
+/* Kalkulator */
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:25;background:var(--sea2);border-top:2px solid var(--line);border-radius:16px 16px 0 0;padding:12px max(16px,env(safe-area-inset-right,0px)) calc(12px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));transform:translateY(110%);transition:transform .2s}
+.sheet.show{transform:none}
+.sheet .in{max-width:540px;margin:0 auto}
+.disp{background:var(--sea);border-radius:10px;padding:10px 12px;text-align:right;min-height:72px}
+.disp .e{font-size:18px;color:var(--mute);word-break:break-all}
+.disp .r{font-size:30px;font-weight:700;font-variant-numeric:tabular-nums}
+.keys{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:8px}
+.keys button{min-height:50px;border-radius:10px;background:var(--sea3);font-size:20px;font-weight:700}
+.keys .op{color:var(--sig)} .keys .eq{background:var(--sig);color:var(--sig-ink)}
+.sheet-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+
+/* Velkomst */
+.welcome{display:grid;gap:16px;padding-top:12px}
+.welcome h1{font-size:46px;color:var(--sig)}
+.welcome p{margin:0;font-size:19px}
+.welcome input{font:inherit;font-size:24px;padding:12px 14px;border-radius:12px;border:2px solid var(--line);background:var(--sea2);color:var(--text);width:100%}
+
+.bob{animation:bob 3.2s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(3px)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="app">
+
+<!-- VELKOMST -->
+<section class="screen" id="s-welcome" hidden>
+  <div class="welcome">
+    <span class="eyebrow">Eksamenstrening MAT1129 · TIF</span>
+    <h1>Velkommen til båtverkstedet</h1>
+    <div id="w-boat"></div>
+    <p>Her ligger en aluminiumsbåt på slippen. Den er bare en tegning ennå.</p>
+    <p>Hver gang du klarer en runde med matte, får du en stjerne. Stjernene bygger båten: sveisesømmer, styrepult, motor, propell, lakk – og til slutt sjøsetting.</p>
+    <p>Alle oppgavene er hentet fra det som kommer på eksamen 27. november.</p>
+    <label for="boatname" class="eyebrow">Hva skal båten hete?</label>
+    <input id="boatname" maxlength="14" placeholder="F.eks. Havørn" autocomplete="off">
+    <button class="btn sig full" id="w-go">Start første jobb</button>
+  </div>
+</section>
+
+<!-- VERKSTED -->
+<section class="screen" id="s-home" hidden>
+  <div class="top">
+    <h1>Båtverkstedet</h1>
+    <div class="count"><b class="num" id="days">–</b><span id="days-l">dager igjen</span></div>
+  </div>
+  <div class="dock">
+    <div id="home-boat"></div>
+    <div class="dock-row">
+      <div class="stars-big"><span class="num" id="h-stars">0</span> <small>av 36 stjerner</small></div>
+      <div class="shift" id="shift"></div>
+    </div>
+    <div class="bar"><i id="h-bar" style="width:0"></i></div>
+    <div style="font-size:15px;color:var(--mute)" id="h-next"></div>
+  </div>
+
+  <button class="go" id="go-next">
+    <div><b id="gn-t">Neste jobb</b><span id="gn-s"></span></div>
+    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+  </button>
+
+  <div class="section-title"><h2>Del 1 · uten kalkulator</h2><span>1 time på eksamen</span></div>
+  <div class="stations" id="st-d1"></div>
+  <div class="section-title"><h2>Del 2 · med kalkulator</h2><span>3 timer på eksamen</span></div>
+  <div class="stations" id="st-d2"></div>
+
+  <div class="exam-card">
+    <span class="eyebrow" style="color:#4A6372">Generalprøve</span>
+    <h2>Prøveeksamen</h2>
+    <p>10 oppgaver blandet, slik som på eksamen. Først 5 uten kalkulator, så 5 med. Du skriver svarene selv.</p>
+    <button class="btn dark full" id="go-exam">Start prøveeksamen</button>
+  </div>
+</section>
+
+<!-- RUNDE -->
+<section class="screen" id="s-round" hidden>
+  <div class="rtop">
+    <button class="x" id="r-x" aria-label="Avslutt runden"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <div class="pips" id="pips"></div>
+    <div class="combo num" id="combo"></div>
+  </div>
+  <div class="rlabel"><b id="r-title"></b><span class="tag" id="r-tag"></span></div>
+  <div class="plate" id="plate">
+    <div id="q-tip"></div>
+    <div id="q-text"></div>
+    <ol class="steps" id="q-steps"></ol>
+    <div class="tools" id="q-tools"></div>
+  </div>
+  <div class="answers" id="answers"></div>
+</section>
+
+<!-- RESULTAT -->
+<section class="screen" id="s-result" hidden>
+  <div class="result" id="result"></div>
+</section>
+
+<!-- BÅTEN -->
+<section class="screen" id="s-boat" hidden>
+  <div class="top"><h1 id="b-name">Båten</h1><div class="count"><b class="num" id="b-stars">0</b><span>stjerner</span></div></div>
+  <div class="dock"><div id="big-boat"></div></div>
+  <div class="section-title"><h2>Byggeliste</h2><span>stjerner som trengs</span></div>
+  <div class="parts" id="parts"></div>
+  <div class="section-title"><h2>Treffsikkerhet</h2><span>riktige av alle svar</span></div>
+  <div class="stat" id="stats"></div>
+</section>
+
+<!-- VERKTØYKASSE -->
+<section class="screen" id="s-tools" hidden>
+  <div class="top"><h1>Verktøykassa</h1></div>
+  <p style="margin:0;color:var(--mute);font-size:16px">Formlene du trenger, med eksempler fra verkstedet.</p>
+  <div id="formulas"></div>
+</section>
+
+</div>
+
+<!-- Tilbakemelding -->
+<div class="fb" id="fb"><div class="in"><h3 id="fb-t"></h3><p id="fb-p"></p><button class="btn full" id="fb-go">Neste</button></div></div>
+
+<!-- Kalkulator -->
+<div class="sheet" id="calc"><div class="in">
+  <div class="sheet-head"><b style="font-family:var(--display);font-size:22px">Kalkulator</b><button class="tool" id="calc-x" style="background:var(--sea3);color:var(--text)">Lukk</button></div>
+  <div class="disp"><div class="e" id="c-e">&nbsp;</div><div class="r" id="c-r">0</div></div>
+  <div class="keys" id="keys"></div>
+</div></div>
+
+<!-- Bunnmeny -->
+<nav class="nav" id="nav"><div class="in">
+  <button data-tab="home" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9H3z"/><path d="M9 20v-6h6v6"/></svg>Verksted</button>
+  <button data-tab="boat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 14h18l-3 5H6z"/><path d="M12 14V4l6 7h-6"/></svg>Båten</button>
+  <button data-tab="tools"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 8h18v12H3z"/><path d="M9 8V5h6v3M3 13h18"/></svg>Verktøykasse</button>
+</div></nav>
+
+<script>
+/*GEN-START*/
+const R=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const P=a=>a[Math.floor(Math.random()*a.length)];
+const rd=(v,d=0)=>Math.round(v*Math.pow(10,d))/Math.pow(10,d);
+function fmt(n,d=0){if(!isFinite(n))return String(n);let s=Math.abs(rd(n,d)).toFixed(d);let [i,f]=s.split('.');if(i.length>3)i=i.replace(/\B(?=(\d{3})+(?!\d))/g,' ');return (n<0&&rd(n,d)!==0?'−':'')+i+(f?','+f:'');}
+const F=fmt;
+
+const GEN={
+lonn(L){
+  if(L===1){const t=R(2,6),w=P([120,150,160,180,200]),a=t*w;
+    return {tip:'<strong class="rule">Timer ganger timelønn</strong>Tenk på lønnsslippen fra jobben: hver time gir like mye. Flere timer betyr at du <b>ganger</b> timene med timelønna.',text:`Du jobber <b>${t} timer</b> på båtverkstedet. Timelønnen er <b>${w} kr</b>.<br>Hvor mye tjener du?`,ans:a,unit:'kr',steps:['Lønn = antall timer · timelønn',`${t} · ${w} = ${F(a)}`],wrong:[t+w,w*(t+1),a/2]};}
+  if(L===2){
+    if(Math.random()<.5){const a=[R(3,9)*50,R(6,15)*50,R(8,20)*50],s=a[0]+a[1]+a[2];
+      return {tip:'<strong class="rule">Legg sammen alle dagene</strong>Alt havner i samme lommebok. Legg sammen én dag om gangen – start med de to letteste tallene.',text:`Du har jobbet tre dager i båthavna. Du tjente <b>${a[0]} kr</b>, <b>${a[1]} kr</b> og <b>${F(a[2])} kr</b>.<br>Hvor mye tjente du til sammen?`,ans:s,unit:'kr',steps:['Legg sammen alle dagene',`${a[0]} + ${a[1]} + ${a[2]} = ${F(s)}`],wrong:[s-50,s+100,a[0]+a[1]]};}
+    const w=P([150,160,180,200,250]),t=R(3,8),E=w*t;
+    return {tip:'<strong class="rule">Lønn delt på timelønn = timer</strong>Snu det: hvor mange ganger går timelønna opp i det du tjente? <b>Del</b> lønna på timelønna.',text:`Du tjente <b>${F(E)} kr</b> på å skrape bunnen på en båt. Timelønnen er <b>${w} kr</b>.<br>Hvor mange timer jobbet du?`,ans:t,unit:'timer',steps:['Timer = lønn : timelønn',`${F(E)} : ${w} = ${t}`],wrong:[t+1,t-1,t+2]};}
+  const w=P([100,150,200]),s=w+50,h=R(3,6),h1=R(2,5),h2=R(3,6),a1=w*h1,a2=w*h2,as=s*h,tot=h+h1+h2;
+  return {tip:'<strong class="rule">Lørdag først, så resten</strong>Gjør det i to trinn. Finn først lørdagslønna per time (tjent : timer). Trekk fra tillegget – da har du vanlig timelønn til de andre dagene.',text:`Ina jobber i en båtbutikk. Mandag tjente hun <b>${a1} kr</b>, onsdag <b>${a2} kr</b> og lørdag <b>${F(as)} kr</b>.<br>Timelønnen er <b>50 kr høyere</b> på lørdager. Lørdag jobbet hun <b>${h} timer</b>.<br>Hvor mange timer jobbet hun til sammen?`,ans:tot,unit:'timer',
+    steps:[`Lørdag: ${F(as)} : ${h} = ${s} kr per time`,`Vanlig timelønn: ${s} − 50 = ${w} kr`,`Mandag: ${a1} : ${w} = ${h1} timer`,`Onsdag: ${a2} : ${w} = ${h2} timer`,`Til sammen: ${h1} + ${h2} + ${h} = ${tot} timer`],wrong:[h1+h2,tot+1,rd((a1+a2+as)/s)]};
+},
+malestokk(L){
+  if(L===1){const k=P([2,3,4,5,10]),m=R(2,12)*5,real=m*k;
+    return {tip:'<strong class="rule">Mot tegningen: del</strong>I 1 : 3 er tallet til høyre virkeligheten: 1 mm på tegningen er 3 mm i virkeligheten. Tegningen er mindre, så du <b>deler</b>.',text:`En aksling er <b>${real} mm</b> lang i virkeligheten. Du tegner den i målestokk <b>1 : ${k}</b>.<br>Hvor lang blir den på tegningen?`,ans:m,unit:'mm',steps:[`1 : ${k} betyr at tegningen er ${k} ganger mindre`,`${real} : ${k} = ${m} mm`],wrong:[real*k,real-k,m*2]};}
+  if(L===2){const k=P([2,3,4,5,10]),m=R(3,15)*4,real=m*k;
+    return {tip:'<strong class="rule">Mot virkeligheten: gang</strong>Tegningen er krympet. For å finne virkeligheten blåser du den opp igjen – <b>gang</b> med tallet til høyre.',text:`På arbeidstegningen er en brakett <b>${m} mm</b>. Målestokken er <b>1 : ${k}</b>.<br>Hvor lang er braketten i virkeligheten?`,ans:real,unit:'mm',steps:[`1 : ${k} betyr at virkeligheten er ${k} ganger større`,`${m} · ${k} = ${real} mm`],wrong:[rd(m/k,1),m+k,real*10]};}
+  if(Math.random()<.5){const r=P([4,5,6,8,12]),k=P([2,5,10]),a=r*k;
+    return {tip:'<strong class="rule">Stort tall først = forstørret</strong>Står det største tallet først (5 : 1), er tegningen <b>større</b> enn tingen. Da ganger du.',text:`En liten skrue til motoren er <b>${r} mm</b>. Du tegner den forstørret i målestokk <b>${k} : 1</b>.<br>Hvor lang blir skruen på tegningen?`,ans:a,unit:'mm',steps:[`${k} : 1 betyr at tegningen er ${k} ganger større`,`${r} · ${k} = ${a} mm`],wrong:[rd(r/k,1),r+k,a*10]};}
+  const c=P([[3.6,20],[4.5,50],[6,30],[5.4,20],[4.2,30],[3,25]]),cm=c[0]*100,a=rd(cm/c[1],1);
+  return {tip:'<strong class="rule">Samme enhet først</strong>Gjør om til samme enhet først: 1 m = 100 cm. Deretter deler du på målestokk-tallet.',text:`Båten er <b>${F(c[0],1)} m</b> lang. Du tegner den i målestokk <b>1 : ${c[1]}</b>.<br>Hvor mange <b>cm</b> lang blir båten på tegningen?`,ans:a,unit:'cm',dec:1,steps:[`Gjør om til cm: ${F(c[0],1)} m = ${cm} cm`,`${cm} : ${c[1]} = ${F(a,1)} cm`],wrong:[rd(c[0]/c[1]*10,1),cm*c[1]/100,rd(a*10,1)]};
+},
+toleranse(L){
+  if(L===1){const M=R(40,180),u=P([1,1,0.5]),d=u===1?0:1,big=Math.random()<.5,a=big?M+u:M-u;
+    return {tip:'<strong class="rule">Minste: minus. Største: pluss</strong>± betyr «pluss eller minus». Linjalen kan bomme litt begge veier. Minste = trekk fra. Største = legg til.',text:`Du måler et bor til <b>${M} mm</b> med linjal. Måleusikkerheten er <b>± ${F(u,d)} mm</b>.<br>Hva er den <b>${big?'største':'minste'}</b> lengden boret kan ha?`,ans:a,unit:'mm',dec:d,steps:[big?'Største lengde: legg til usikkerheten':'Minste lengde: trekk fra usikkerheten',`${M} ${big?'+':'−'} ${F(u,d)} = ${F(a,d)} mm`],wrong:[big?M-u:M+u,M,big?M+2*u:M-2*u]};}
+  const table=`<table><tr><th>Basismål (mm)</th><th>Middels</th></tr><tr><td>over 6 t.o.m. 30</td><td>± 0,2</td></tr><tr><td>over 30 t.o.m. 120</td><td>± 0,3</td></tr><tr><td>over 120 t.o.m. 315</td><td>± 0,5</td></tr></table>`;
+  let D,tol,intro;
+  if(L===2){D=R(20,100);tol=P([0.1,0.2,0.3,0.5]);intro=`Tegningen sier <b>Ø ${D} ± ${F(tol,1)}</b>.`;}
+  else{const c=P([[8,29,0.2],[31,119,0.3],[121,300,0.5]]);D=R(c[0],c[1]);tol=c[2];intro=`Tegningen sier <b>Ø ${D}</b>. Akslingen skal dreies med <b>middels</b> toleranse.${table}`;}
+  const lo=rd(D-tol,2),hi=rd(D+tol,2);
+  if(L===3&&Math.random()<.4){const big=Math.random()<.5,a=big?hi:lo;
+    return {tip:'<strong class="rule">Finn raden, les av ±</strong>Finn raden i tabellen der målet passer (over … til og med …). Les av ± i middels-kolonnen. Legg til eller trekk fra.',text:`${intro}Hva er det <b>${big?'største':'minste'}</b> målet som kan godkjennes?`,ans:a,unit:'mm',dec:1,tol:0.01,steps:[`Ø ${D} ligger i raden med ± ${F(tol,1)}`,`${D} ${big?'+':'−'} ${F(tol,1)} = ${F(a,1)} mm`],wrong:[big?lo:hi,D,big?rd(D+2*tol,1):rd(D-2*tol,1)]};}
+  const ok=Math.random()<.5;let delta=ok?(Math.random()*1.6-0.8)*tol:(1.15+Math.random()*0.9)*tol*(Math.random()<.5?-1:1);
+  const meas=rd(D+delta,2),inside=meas>=lo-1e-9&&meas<=hi+1e-9;
+  return {tip:'<strong class="rule">Inni vinduet = godkjent</strong>Lag et «godkjent-vindu» med minste og største mål. Ligger målingen inni vinduet, er den godkjent. Sammenlign desimal for desimal.',text:`${intro}Du dreier akslingen og måler <b>Ø ${F(meas,2)}</b> med mikrometer.<br>Kan akslingen godkjennes?`,choice:{options:['Godkjent','Ikke godkjent'],correct:inside?'Godkjent':'Ikke godkjent'},
+    steps:[...(L===3?[`Ø ${D} ligger i raden med ± ${F(tol,1)}`]:[]),`Minste mål: ${D} − ${F(tol,1)} = ${F(lo,2)}`,`Største mål: ${D} + ${F(tol,1)} = ${F(hi,2)}`,`Målt ${F(meas,2)} er ${inside?'mellom grensene → godkjent':'utenfor grensene → ikke godkjent'}`]};
+},
+vinkler(L){
+  if(L===1){let a=R(30,80),b=R(30,80);const c=180-a-b;
+    return {tip:'<strong class="rule">Trekant = 180°</strong>Vinklene i <b>alle</b> trekanter blir 180° til sammen – en halv runde. Trekk fra det du vet.',text:`En trekantet knekkplate skal sveises inn. To av vinklene er <b>${a}°</b> og <b>${b}°</b>.<br>Hvor stor er den tredje vinkelen?`,ans:c,unit:'°',steps:['Vinklene i en trekant er til sammen 180°',`180 − ${a} − ${b} = ${c}°`],wrong:[360-a-b,a+b,90]};}
+  const N={4:'firkant',5:'femkant',6:'sekskant',8:'åttekant'};
+  if(L===2){const n=P([4,5,6,8]),s=(n-2)*180;
+    return {tip:'<strong class="rule">Hjørner minus 2, ganger 180</strong>Trekk streker fra ett hjørne til de andre. Antall trekanter = hjørner − 2. Hver trekant har 180°.',text:`Hva er summen av alle vinklene inni en <b>${N[n]}</b> (${n} hjørner)?`,ans:s,unit:'°',steps:['Del figuren i trekanter: antall hjørner − 2',`${n} − 2 = ${n-2} trekanter`,`${n-2} · 180° = ${s}°`],wrong:[n*180,(n-1)*180,360]};}
+  const c=P([[6,'en sekskantmutter'],[6,'et sekskantstål'],[8,'en åttekantet flens'],[5,'en femkantet plate']]),n=c[0],s=(n-2)*180,a=s/n;
+  return {tip:'<strong class="rule">Summen delt på hjørnene</strong>Finn hele summen først: (hjørner − 2) · 180. Alle vinklene er like store, så del likt på antall hjørner. Sjekk: en mutter har butte vinkler, større enn 90°.',text:`Helge kapper <b>${c[1]}</b>. Alle sidene er like lange.<br>Hvor mange grader er <b>hver</b> vinkel inni figuren?`,ans:a,unit:'°',steps:[`Summen av vinklene: (${n} − 2) · 180° = ${s}°`,`Alle ${n} vinklene er like: ${s} : ${n} = ${a}°`],wrong:[360/n,s,180-360/n===a?60:180-360/n]};
+},
+moms(L){
+  if(L===1){const p=P([80,120,200,400,600,800,1000,1200,2000]);
+    if(Math.random()<.5){const a=p/4;return {tip:'<strong class="rule">Uten moms: del på 4</strong>25 % er en firedel. Tenk en pizza i 4 biter: momsen er én bit av prisen uten moms.',text:`En pumpe koster <b>${F(p)} kr</b> uten moms. Momsen er <b>25 %</b>.<br>Hvor mange kroner er momsen?`,ans:a,unit:'kr',steps:['25 % er en firedel','Moms = pris uten moms : 4',`${F(p)} : 4 = ${F(a)} kr`],wrong:[p/5,p+25,p*1.25]};}
+    const a=p*1.25;return {tip:'<strong class="rule">Moms oppå: gang med 1,25</strong>Pris med moms = prisen + momsen. Finn momsen (en firedel) og legg den oppå.',text:`En pumpe koster <b>${F(p)} kr</b> uten moms. Du legger på <b>25 %</b> moms.<br>Hva blir prisen med moms?`,ans:a,unit:'kr',steps:[`Moms: ${F(p)} : 4 = ${F(p/4)} kr`,`Pris med moms: ${F(p)} + ${F(p/4)} = ${F(a)} kr`],wrong:[p+25,p/4,p*1.2]};}
+  if(L===2){const p=P([160,240,400,480,800,1200,2000]),t=p*1.25,a=t/5;
+    return {tip:'<strong class="rule">Med moms: del på 5</strong>Prisen uten moms er 4 biter. Momsen er 1 bit til. Totalen blir 5 biter – og momsen er én av de fem.',text:`En kunde betaler <b>${F(t)} kr</b> for en redningsvest. Prisen er <b>med 25 % moms</b>.<br>Hvor mange kroner av dette er moms?`,ans:a,unit:'kr',steps:['Pris med moms = 100 % + 25 % = 125 %','Momsen er 25 av 125 = en femdel',`${F(t)} : 5 = ${F(a)} kr`],wrong:[t/4,t-a/2,p]};}
+  if(Math.random()<.5){const t=P([500,1000,250,750,1500]);
+    return {tip:'<strong class="rule">Med moms: del på 5</strong>Test med et enkelt tall: en vare koster 400 kr uten moms. Hva blir momsen og totalen? Se hvem sin regel som stemmer.',text:`Kasper og Viktor jobber i en båtbutikk. En kunde betaler <b>${F(t)} kr med moms</b>.<br>Kasper: «Momsen er totalen delt på 5.»<br>Viktor: «Momsen er totalen delt på 4.»<br>Hvem har rett?`,choice:{options:['Kasper (dele på 5)','Viktor (dele på 4)'],correct:'Kasper (dele på 5)'},
+      steps:[`Pris uten moms: ${F(t)} : 1,25 = ${F(t/1.25)} kr`,`Moms: ${F(t)} − ${F(t/1.25)} = ${F(t/5)} kr`,`${F(t)} : 5 = ${F(t/5)} → Kasper har rett`,'25 % gjelder prisen uten moms, ikke totalen']};}
+  const p=P([240,400,640,800,1600,2400]),t=p*1.25;
+  return {tip:'<strong class="rule">Tilbake: del på 1,25</strong>Totalen er 5 biter, og 1 bit er moms. Ta bort momsbiten – eller del totalen på 1,25.',text:`En vinsj koster <b>${F(t)} kr med moms</b> (25 %).<br>Hva koster den <b>uten</b> moms?`,ans:p,unit:'kr',steps:['Pris med moms = 125 % = 1,25 · pris uten moms',`${F(t)} : 1,25 = ${F(p)} kr`],wrong:[t*0.75,t-t/4,t/5]};
+},
+linear(L){
+  if(L===1){
+    if(Math.random()<.5){const A=P([40,50,60,80]),B=P([4,5,8,10]),t=R(1,Math.min(4,Math.floor(A/B)-1)),a=A-B*t;
+      return {tip:'<strong class="rule">Start minus tap ganger tid</strong>Tallet som står alene er det du starter med. Tallet foran t er det som forsvinner hver time. Sett inn timene der det står t.',text:`Det er ${A} liter bensin i båttanken. Etter <i>t</i> timer er det <b>V = ${A} − ${B} · t</b> liter igjen.<br>Hvor mange liter er igjen etter <b>${t} timer</b>?`,ans:a,unit:'liter',steps:[`Sett inn t = ${t}`,`${A} − ${B} · ${t} = ${A} − ${B*t} = ${a}`],wrong:[A-B,A-t,A+B*t]};}
+    const t=R(1,8),a=450000-50000*t;
+    return {tip:'<strong class="rule">Sett inn t, gang før minus</strong>Sett inn antall år der det står t. Regn gangestykket først, så minus.',text:`Elvira tar opp et lån. Etter <i>t</i> år er lånet <b>L = 450 000 − 50 000 · t</b> kroner.<br>Hvor stort er lånet etter <b>${t} år</b>?`,ans:a,unit:'kr',steps:[`Sett inn t = ${t}`,`450 000 − 50 000 · ${t} = 450 000 − ${F(50000*t)} = ${F(a)}`],wrong:[450000-50000,a-50000,450000-5000*t]};}
+  if(L===2){
+    if(Math.random()<.5){const B=P([4,5,6,8,10]),k=R(4,9),A=B*k;
+      return {tip:'<strong class="rule">Tom = start delt på tap</strong>Tom tank = 0 liter igjen. Hvor mange ganger kan du ta bort det som forsvinner hver time? Del startmengden på det.',text:`Bensinen i tanken: <b>V = ${A} − ${B} · t</b> liter, der <i>t</i> er timer.<br>Hvor mange timer tar det før tanken er tom?`,ans:k,unit:'timer',steps:[`Tom tank: ${A} − ${B} · t = 0`,`${B} · t = ${A}`,`t = ${A} : ${B} = ${k}`],wrong:[k+1,A-B,k-1]};}
+    const per=P([25000,30000,40000,50000,60000]),k=R(5,10),A=per*k;
+    return {tip:'<strong class="rule">Ferdig = lån delt på per år</strong>Nedbetalt = 0 kr igjen. Del hele lånet på det som betales hvert år.',text:`Et båtlån: <b>L = ${F(A)} − ${F(per)} · t</b> kroner, der <i>t</i> er år.<br>Hvor mange år tar det å betale tilbake hele lånet?`,ans:k,unit:'år',steps:[`Nedbetalt: ${F(A)} − ${F(per)} · t = 0`,`t = ${F(A)} : ${F(per)} = ${k}`],wrong:[k+1,k*2,k-1]};}
+  if(Math.random()<.5){const f=P([1500,2000,2500]),p=P([100,120,150]),x=R(10,30),a=f+p*x;
+    return {tip:'<strong class="rule">Fast + per uke ganger uker</strong>Den faste prisen betaler du én gang. Ukeprisen ganger du med antall uker. Til slutt legger du sammen.',text:`En båtplass koster <b>${F(f)} kr</b> i året pluss <b>${p} kr per uke</b> for strøm.<br>Hva koster båtplassen hvis båten ligger der i <b>${x} uker</b>?`,ans:a,unit:'kr',steps:['Pris = fast pris + pris per uke · antall uker',`${F(f)} + ${p} · ${x} = ${F(f)} + ${F(p*x)} = ${F(a)} kr`],wrong:[(f+p)*x,f*x,p*x]};}
+  const S=P([200000,300000,400000]),d=P([20000,25000,40000,50000]),n=R(2,4),rem=S-d*n;
+  return {tip:'<strong class="rule">Endring delt på år</strong>Finn først hvor mye som er betalt totalt (start − nå). Del så likt på antall år.',text:`Et båtlån starter på <b>${F(S)} kr</b>. Etter <b>${n} år</b> er lånet <b>${F(rem)} kr</b>. Lånet går like mye ned hvert år.<br>Hvor mye går lånet ned per år?`,ans:d,unit:'kr',steps:[`Nedbetalt: ${F(S)} − ${F(rem)} = ${F(S-rem)} kr`,`Per år: ${F(S-rem)} : ${n} = ${F(d)} kr`],wrong:[S-rem,rd(rem/n),d*2]};
+},
+prosent(L){
+  if(L===1){const x=P([10,20,25,50]),y=P([400,800,1200,2000,3600,8000]),a=y*x/100;
+    return {tip:'<strong class="rule">10 % = flytt kommaet</strong>10 % = flytt kommaet ett hakk til venstre. 20 % = to ganger 10 %. 25 % = en firedel. 50 % = halvparten.',text:`En båtmotor-del koster <b>${F(y)} kr</b>. Du får <b>${x} % rabatt</b>.<br>Hvor mange kroner er rabatten?`,ans:a,unit:'kr',steps:[`${x} % betyr ${x} av 100`,`${F(y)} · ${x} : 100 = ${F(a)} kr`],wrong:[y-x,y-a,rd(y/x)]};}
+  if(L===2){
+    if(Math.random()<.5){const x=P([15,20,30,35]),y=P([1200,2400,4000,6000,8000]),f=1-x/100,a=y*f;
+      return {tip:'<strong class="rule">Rabatt: gang med 1 minus prosent</strong>Med 20 % rabatt betaler du 80 %. Gang prisen med 0,80. Regel: 1 minus prosenten som desimaltall.',text:`En propell koster <b>${F(y)} kr</b>. Den er satt ned <b>${x} %</b>.<br>Hva er den nye prisen?`,ans:a,unit:'kr',steps:[`Vekstfaktor: 1 − ${F(x/100,2)} = ${F(f,2)}`,`${F(y)} · ${F(f,2)} = ${F(a)} kr`],wrong:[y*x/100,y-x,y*(1+x/100)]};}
+    const Lb=P([2.5,3,3.5,4,4.5]),a=rd(Lb*1.2,2);
+    return {tip:'<strong class="rule">Lengre: gang med 1 pluss prosent</strong>20 % lengre = 100 % + 20 % = 120 %. Gang med 1,2.',text:`Båten er <b>${F(Lb,1)} m</b> lang. Transportkassen skal være <b>20 % lengre</b> enn båten.<br>Hvor lang blir kassen?`,ans:a,unit:'m',dec:2,steps:['20 % lengre gir vekstfaktor 1,20',`${F(Lb,1)} · 1,2 = ${F(a,2)} m`],wrong:[Lb+0.2,rd(Lb*0.2,2),rd(Lb*0.8,2)]};}
+  const a=P([200,250,400,500,800]),p=P([12,15,20,25,30,40]),b=a*(1+p/100);
+  return {tip:'<strong class="rule">Endring delt på gammel, ganger 100</strong>Finn først hvor mange kroner prisen økte. Del økningen på den <b>gamle</b> prisen, og gang med 100.',text:`Prisen på en sveisetråd-rull økte fra <b>${a} kr</b> til <b>${F(b)} kr</b>.<br>Hvor mange prosent økte prisen?`,ans:p,unit:'%',dec:0,tol:0.6,steps:[`Økning: ${F(b)} − ${a} = ${F(b-a)} kr`,'Prosent = økning : gammel pris · 100',`${F(b-a)} : ${a} · 100 = ${p} %`],wrong:[rd((b-a)/b*100,1),rd(b-a,1),p+5]};
+},
+fart(L){
+  if(L===1){const h=R(2,4),v=P([15,18,20,25,30]),s=v*h;
+    return {tip:'<strong class="rule">Fart = vei delt på tid</strong>km/h betyr kilometer per time. Hvor langt kommer båten på én time? Del strekningen på antall timer.',text:`Båten kjører <b>${s} km</b> over fjorden på <b>${h} timer</b>.<br>Hva er gjennomsnittsfarten?`,ans:v,unit:'km/h',steps:['Fart = strekning : tid',`${s} : ${h} = ${v} km/h`],wrong:[s*h,s-h,s+h]};}
+  if(L===2){
+    if(Math.random()<.5){const h=R(1,3),m=P([15,30,45,12,6,24,36]),a=rd(h+m/60,2);
+      return {tip:'<strong class="rule">Minutter delt på 60</strong>Klokka har 60 minutter, ikke 100. 30 min er en halv time = 0,5. Del minuttene på 60 – akkurat som på vaktlista.',text:`Turen tar <b>${h} timer og ${m} minutter</b>.<br>Hvor mange timer er det, skrevet som desimaltall?`,ans:a,unit:'timer',dec:2,steps:['Minutter gjøres om til timer ved å dele på 60',`${m} : 60 = ${F(m/60,2)}`,`${h} + ${F(m/60,2)} = ${F(a,2)} timer`],wrong:[rd(h+m/100,2),h*60+m,rd(h+60/m,2)]};}
+    const km=P([200,300,450,700]),kwh=P([15,18,20]),pr=P([3.5,4,5.5]),e=km/100*kwh,a=rd(e*pr,2);
+    return {tip:'<strong class="rule">Strøm først, så pris</strong>To steg: hvor mange kWh trengs (kilometer : 100 · forbruket)? Gang så med prisen per kWh.',text:`Øzlem kjører elbil <b>${km} km</b>. Bilen bruker <b>${kwh} kWh per 100 km</b>. Lading koster <b>${F(pr,2)} kr per kWh</b>.<br>Hva koster ladingen?`,ans:a,unit:'kr',dec:0,tol:1,steps:[`Strøm: ${km} : 100 · ${kwh} = ${F(e,1)} kWh`,`Pris: ${F(e,1)} · ${F(pr,2)} = ${F(a,2)} kr`],wrong:[km*kwh*pr/10,rd(km*pr),rd(e)]};}
+  if(Math.random()<.5){const s=P([700,480,350,260]),h=R(3,10),m=P([16,24,40,48]),t=h+m/60,a=rd(s/t,1);
+    return {tip:'<strong class="rule">Tid i timer, så vei delt på tid</strong>Gjør tida om til timer først (minutter : 60). Felle: 16 minutter er <b>ikke</b> 0,16 timer. Så strekning : tid.',text:`Ifølge kartet er turen <b>${s} km</b>. Kjøretiden er <b>${h} timer og ${m} minutter</b>.<br>Hva blir gjennomsnittsfarten?`,ans:a,unit:'km/h',dec:1,tol:0.3,steps:[`Tid: ${m} : 60 = ${F(m/60,2)}, altså ${F(t,2)} timer`,`Fart: ${s} : ${F(t,2)} = ${F(a,1)} km/h`],wrong:[rd(s/(h+m/100),1),rd(s/h,1),rd(s/(h*60+m),1)]};}
+  const lph=P([8,10,12,15]),h=R(1,3),m=P([15,30,45]),t=h+m/60,pr=P([21.5,22.9,23.4]),l=lph*t,a=rd(l*pr);
+  return {tip:'<strong class="rule">Timer → liter → kroner</strong>Tre steg: tid i timer → liter (liter per time · timer) → kroner (liter · literpris).',text:`Påhengsmotoren bruker <b>${lph} liter bensin i timen</b>. Turen tar <b>${h} t ${m} min</b>. Bensin koster <b>${F(pr,1)} kr/liter</b>.<br>Hva koster bensinen for turen?`,ans:a,unit:'kr',tol:3,steps:[`Tid: ${h} + ${m} : 60 = ${F(t,2)} timer`,`Bensin: ${lph} · ${F(t,2)} = ${F(l,1)} liter`,`Pris: ${F(l,1)} · ${F(pr,1)} = ${F(a)} kr`],wrong:[rd(lph*(h+m/100)*pr),rd(lph*h*pr),rd(l)]};
+},
+formler(L){
+  if(L===1){const n=R(4,12),H=n*(n-1)/2;
+    return {tip:'<strong class="rule">Sett inn, parentes først</strong>Sett inn tallet der det står n – begge stedene. Regn parentesen først, gang, og del på 2.',text:`Når <i>n</i> personer håndhilser på hverandre, blir antall håndtrykk<br><b>H = n · (n − 1) : 2</b><br>Det er <b>${n} personer</b> på båtmessa-standen. Hvor mange håndtrykk blir det?`,ans:H,unit:'',steps:[`Sett inn n = ${n}`,`${n} · (${n} − 1) : 2 = ${n} · ${n-1} : 2`,`${n*(n-1)} : 2 = ${H}`],wrong:[n*n,n*(n-1),n*(n+1)/2]};}
+  const pi='π';
+  if(L===2){const v=P([20,25,30,60,80,100]),d=P([8,10,12,20,25,34,40]),a=rd(v*1000/(Math.PI*d));
+    return {tip:'<strong class="rule">Over delt på under</strong>Regn over og under brøkstreken hver for seg. Under: π · d. Til slutt deler du det over på det under.',text:`Omdreiningstall ved fresing:<br><b>n = v · 1000 : (${pi} · d)</b><br>Skjærehastighet <b>v = ${v} m/min</b>. Diameter <b>d = ${d} mm</b>.<br>Finn omdreiningstallet <i>n</i> (rund av til hele tall).`,ans:a,unit:'r/min',tol:2,steps:[`Over brøkstreken: ${v} · 1000 = ${F(v*1000)}`,`Under brøkstreken: ${pi} · ${d} = ${F(Math.PI*d,2)}`,`${F(v*1000)} : ${F(Math.PI*d,2)} ≈ ${F(a)} r/min`],wrong:[rd(v*1000/d),rd(v*1000/(Math.PI*d/2)),rd(v*Math.PI*d/1000,1)]};}
+  const r=Math.random();
+  if(r<.4){const d=P([34,30,40,25,45]),v=80,n=v*1000/(Math.PI*d),set=[160,320,580,760,840,1000],ok=set.filter(s=>s<=n).pop();
+    return {tip:'<strong class="rule">Maks-fart: velg rett under</strong>Regn ut n med formelen. Siden 80 m/min er <b>maks</b>, kan du ikke velge en innstilling over n. Velg den høyeste under.',text:`En <b>Ø ${d}-fres</b> skal brukes. Anbefalt skjærehastighet er <b>maks 80 m/min</b>.<br><b>n = v · 1000 : (${pi} · d)</b><br>Fresemaskinen kan stilles på: 160, 320, 580, 760, 840 eller 1000 r/min.<br>Hvilken innstilling bør du velge?`,choice:{options:set.map(String),correct:String(ok)},
+      steps:[`n = 80 · 1000 : (${pi} · ${d}) ≈ ${F(n)} r/min`,'v er maks 80, så vi kan ikke gå høyere enn dette',`Høyeste innstilling som ikke er over ${F(n)}: ${ok} r/min`]};}
+  if(r<.75){const n=P([320,580,760]),d=P([20,25,33,40]),a=rd(n*Math.PI*d/1000,1);
+    return {tip:'<strong class="rule">Gang alt, del på 1000</strong>Her er det bare ganging: n · π · d. Del til slutt på 1000 for å gjøre millimeter om til meter.',text:`En <b>Ø ${d}-fres</b> går med <b>${n} r/min</b>.<br>Skjærehastighet: <b>v = n · ${pi} · d : 1000</b><br>Finn skjærehastigheten <i>v</i> i m/min.`,ans:a,unit:'m/min',dec:1,tol:0.3,steps:[`${n} · ${pi} · ${d} = ${F(n*Math.PI*d,1)}`,`${F(n*Math.PI*d,1)} : 1000 = ${F(a,1)} m/min`],wrong:[rd(n*d/1000,1),rd(n*Math.PI*d/100,1),rd(n*1000/(Math.PI*d),1)]};}
+  const n=R(12,30),H=n*(n-1)/2,g=n-2;
+  return {tip:'<strong class="rule">Gjett, regn, juster</strong>Prøv deg fram: gjett en n, regn ut og juster. Et godt startgjett er et tall litt over kvadratroten av to ganger håndtrykkene.',text:`Alle på en fest håndhilser på hverandre. Det blir <b>${H} håndtrykk</b>.<br><b>H = n · (n − 1) : 2</b><br>Hvor mange er det på festen?`,ans:n,unit:'personer',steps:['Prøv deg fram med ulike n',`n = ${g}: ${g} · ${g-1} : 2 = ${g*(g-1)/2} (for lite)`,`n = ${n}: ${n} · ${n-1} : 2 = ${H} ✓`],wrong:[n+1,n-1,rd(Math.sqrt(H))]};
+},
+volum(L){
+  if(L===1){
+    if(Math.random()<.5){const l=R(4,8),b=R(3,5),h=R(2,4),a=l*b*h;
+      return {tip:'<strong class="rule">Kasse: lengde · bredde · høyde</strong>Volum av en kasse: lengde · bredde · høyde. Når målene er i dm, får du svaret rett i liter.',text:`En firkantet bensintank er <b>${l} dm</b> lang, <b>${b} dm</b> bred og <b>${h} dm</b> høy.<br>Hvor mange liter rommer tanken? (1 dm³ = 1 liter)`,ans:a,unit:'liter',steps:['Volum = lengde · bredde · høyde',`${l} · ${b} · ${h} = ${a} dm³ = ${a} liter`],wrong:[l+b+h,l*b,2*(l*b+l*h+b*h)]};}
+    const c=P([6,7,8]),A=c*R(2,5),a=A/c;
+    return {tip:'<strong class="rule">Areal delt på dekkevne</strong>Dekkevnen sier hvor mange m² én liter rekker. Hvor mange slike porsjoner trenger du? Del arealet på dekkevnen.',text:`Du skal male <b>${A} m²</b> av båtdekket. Malingen dekker <b>${c} m² per liter</b>.<br>Hvor mange liter trenger du?`,ans:a,unit:'liter',steps:['Liter = areal : dekkevne',`${A} : ${c} = ${a} liter`],wrong:[A*c,A-c,a+1]};}
+  if(L===2){
+    if(Math.random()<.5){const d=P([3,4,5,6]),l=R(6,12),r=d/2,a=rd(Math.PI*r*r*l,1);
+      return {tip:'<strong class="rule">Halv diameter først!</strong>Fellen: formelen bruker <b>radius</b> = halve diameteren. Del diameteren på 2 først. r² betyr r · r.',text:`En rund dieseltank er en sylinder med diameter <b>${d} dm</b> og lengde <b>${l} dm</b>.<br><b>V = π · r² · l</b><br>Hvor mange liter rommer tanken? (1 dm³ = 1 L)`,ans:a,unit:'liter',dec:1,steps:[`Radius er halve diameteren: ${d} : 2 = ${F(r,1)} dm`,`r² = ${F(r,1)} · ${F(r,1)} = ${F(r*r,2)}`,`V = π · ${F(r*r,2)} · ${l} ≈ ${F(a,1)} liter`],wrong:[rd(Math.PI*d*d*l,1),rd(Math.PI*r*l,1),rd(r*r*l,1)]};}
+    const d=P([1.2,1.5,1.9,2]),l=P([2,2.5,3]),r=d/2,a=rd(Math.PI*r*r*l,2);
+    return {tip:'<strong class="rule">Halv diameter først!</strong>Halver diameteren, gang radiusen med seg selv, så med π og lengden. Svaret blir i m³.',text:`Et hamsterhjul av aluminium er en sylinder: <b>${F(l,1)} m</b> langt med diameter <b>${F(d,1)} m</b>.<br><b>V = π · r² · l</b><br>Hvor stort volum har hjulet (m³, to desimaler)?`,ans:a,unit:'m³',dec:2,tol:0.02,steps:[`r = ${F(d,1)} : 2 = ${F(r,2)} m`,`V = π · ${F(r,2)}² · ${F(l,1)}`,`V ≈ ${F(a,2)} m³`],wrong:[rd(Math.PI*d*d*l,2),rd(Math.PI*r*l,2),rd(r*r*l,2)]};}
+  const A=P([15,18,22,25,30]),c=P([6,7,8]),s=0.75,p=P([199,249,299]),lit=A/c,n=Math.ceil(lit/s-1e-9),a=n*p;
+  return {tip:'<strong class="rule">Bokser rundes alltid opp</strong>Tre steg: liter (areal : dekkevne) → bokser (liter : 0,75) → kroner. Butikken selger ikke halve bokser – rund alltid <b>opp</b>.',text:`Innsiden av båten skal males med antiskli-maling:<br>• Areal: <b>${A} m²</b><br>• Malingen dekker <b>${c} m² per liter</b><br>• En boks er <b>0,75 L</b> og koster <b>${p} kr</b><br>Hva koster malingen? Du må kjøpe hele bokser.`,ans:a,unit:'kr',tol:1,steps:[`Liter: ${A} : ${c} = ${F(lit,2)} L`,`Bokser: ${F(lit,2)} : 0,75 = ${F(lit/s,2)} → rund OPP til ${n} bokser`,`Pris: ${n} · ${p} = ${F(a)} kr`],wrong:[rd(lit/s*p),(n-1)*p,rd(lit*p)]};
+},
+pytagoras(L){
+  if(L===1){const t=P([[3,4,5],[3,4,5],[6,8,10],[5,12,13],[9,12,15],[8,15,17]]);
+    return {tip:'<strong class="rule">Kort² + kort² = lang²</strong>Rampa er den lange skrå siden. Gang hver av de korte sidene med seg selv, legg sammen, og ta kvadratroten.',text:`Slipprampa går <b>${t[0]} m</b> bortover og <b>${t[1]} m</b> opp. Vinkelen ved bakken er rett (90°).<br>Hvor lang er rampa?<br><b>c² = a² + b²</b>`,ans:t[2],unit:'m',steps:[`a² + b² = ${t[0]}² + ${t[1]}² = ${t[0]**2} + ${t[1]**2} = ${t[2]**2}`,`c = √${t[2]**2} = ${t[2]} m`],wrong:[t[0]+t[1],t[2]**2,t[2]+1]};}
+  if(L===2){
+    if(Math.random()<.6){const a=R(15,40)/10,b=R(10,30)/10,c=rd(Math.sqrt(a*a+b*b),2);
+      return {tip:'<strong class="rule">Kort² + kort² = lang²</strong>Staget er den lange skrå siden: kort² + kort², så √ på kalkulatoren.',text:`Et avstiveringsstag sveises på skrå i en ramme som er <b>${F(a,1)} m</b> bred og <b>${F(b,1)} m</b> høy.<br>Hvor langt er staget (to desimaler)?`,ans:c,unit:'m',dec:2,tol:0.02,steps:[`c² = ${F(a,1)}² + ${F(b,1)}² = ${F(a*a,2)} + ${F(b*b,2)} = ${F(a*a+b*b,2)}`,`c = √${F(a*a+b*b,2)} ≈ ${F(c,2)} m`],wrong:[rd(a+b,2),rd(a*a+b*b,2),rd(Math.sqrt(Math.abs(a*a-b*b)),2)]};}
+    const t=P([[3,4,5],[6,8,10],[5,12,13],[9,12,15]]),k=P([0.5,1,1.5]),a=t[0]*k,c=t[2]*k,b=t[1]*k;
+    return {tip:'<strong class="rule">Kort side: lang² minus kort²</strong>Stigen er den lengste siden. Når du leter etter en <b>kort</b> side, tar du lang² <b>minus</b> kort², så √.',text:`En stige på <b>${F(c,1)} m</b> står mot båten på slippen. Foten står <b>${F(a,1)} m</b> fra skroget.<br>Hvor høyt opp når stigen?<br><b>b² = c² − a²</b>`,ans:b,unit:'m',dec:1,steps:[`b² = ${F(c,1)}² − ${F(a,1)}² = ${F(c*c,2)} − ${F(a*a,2)} = ${F(b*b,2)}`,`b = √${F(b*b,2)} = ${F(b,1)} m`],wrong:[rd(c-a,1),rd(Math.sqrt(c*c+a*a),1),rd(c*c-a*a,1)]};}
+  const Lb=P([2.5,3,3.5,4]),h=P([1.8,2,2.3]),k=rd(Lb*1.2,2),c=rd(Math.sqrt(k*k+h*h),2);
+  return {tip:'<strong class="rule">Lengde først, så Pytagoras</strong>To steg: finn kassens lengde først (20 % lengre → · 1,2). Bruk så Pytagoras med lengde og høyde.',text:`Båten er <b>${F(Lb,1)} m</b> lang. Transportkassen er <b>20 % lengre</b> enn båten og <b>${F(h,1)} m</b> høy.<br>Et metallbånd sveises på skrå over siden av kassen (fra hjørne til hjørne).<br>Hvor langt er metallbåndet?`,ans:c,unit:'m',dec:2,tol:0.02,steps:[`Kassens lengde: ${F(Lb,1)} · 1,2 = ${F(k,2)} m`,`c² = ${F(k,2)}² + ${F(h,1)}² = ${F(k*k,2)} + ${F(h*h,2)} = ${F(k*k+h*h,2)}`,`c = √${F(k*k+h*h,2)} ≈ ${F(c,2)} m`],wrong:[rd(Math.sqrt(Lb*Lb+h*h),2),rd(k+h,2),rd(k*k+h*h,2)]};
+},
+lan(L){
+  if(L===1){const T=P([2150,3480,4250,7181,5600]),y=P([1,2,3]),n=y*12,a=T*n;
+    return {tip:'<strong class="rule">Beløp ganger måneder</strong>Du betaler én gang i måneden. Hvor mange måneder er det? Gang terminbeløpet med det.',text:`Du betaler <b>${F(T)} kr</b> hver måned på et båtlån i <b>${y} år</b>.<br>Hvor mye betaler du til banken totalt?`,ans:a,unit:'kr',steps:[`Antall måneder: ${y} · 12 = ${n}`,`${F(T)} · ${n} = ${F(a)} kr`],wrong:[T*y,T*12,a-T]};}
+  const r=P([9,12,13,15]),S=P([150000,144494,90000,120000,60000]),ren=rd(S*r/1200,2);
+  if(L===2){
+    return {tip:'<strong class="rule">Årsrente delt på 12</strong>Renta står per <b>år</b>, men du betaler hver <b>måned</b>. Del renta på 12. Så: restlån · månedsrente : 100.',text:`Restlånet er <b>${F(S)} kr</b>. Renten er <b>${r} % per år</b>, og du betaler hver måned.<br>Hvor mye er rentene for én måned?`,ans:ren,unit:'kr',dec:2,tol:0.6,steps:[`Rente per måned: ${r} % : 12 = ${F(r/12,3)} %`,`Renter: ${F(S)} · ${F(r/12,3)} : 100 = ${F(ren,2)} kr`],wrong:[rd(S*r/100,2),rd(S*r/12,2),rd(S/12,2)]};}
+  const i=r/1200,T=rd(150000*i/(1-Math.pow(1+i,-24)))+50,av=rd(T-ren-50,2),rest=rd(S-av,2),c=Math.random();
+  if(c<.4) return {tip:'<strong class="rule">Avdrag = det som blir igjen</strong>Det du betaler hver måned deles i tre: renter + gebyr + avdrag. Avdraget er det som blir igjen.',text:`Terminbeløp: <b>${F(T)} kr</b>. Renter denne måneden: <b>${F(ren,2)} kr</b>. Termingebyr: <b>50 kr</b>.<br>Hvor stort er <b>avdraget</b>?`,ans:av,unit:'kr',dec:2,tol:0.6,steps:['Avdrag = terminbeløp − renter − gebyr',`${F(T)} − ${F(ren,2)} − 50 = ${F(av,2)} kr`],wrong:[rd(T-ren,2),rd(T-50,2),rd(T+ren+50,2)]};
+  if(c<.75) return {tip:'<strong class="rule">Bare avdraget krymper lånet</strong>Det er bare avdraget som gjør lånet mindre. Trekk avdraget fra restlånet.',text:`Restlånet før termin er <b>${F(S)} kr</b>. Avdraget denne måneden er <b>${F(av,2)} kr</b>.<br>Hva blir <b>restlånet</b> etter terminen?`,ans:rest,unit:'kr',dec:2,tol:0.6,steps:['Nytt restlån = gammelt restlån − avdrag',`${F(S)} − ${F(av,2)} = ${F(rest,2)} kr`],wrong:[rd(S-T,2),rd(S+av,2),rd(S-ren,2)]};
+  const tot=T*24,k=tot-150000;
+  return {tip:'<strong class="rule">Betalt totalt minus lånt</strong>Det lånet koster = alt du betaler totalt minus det du fikk låne.',text:`Sigurd låner <b>150 000 kr</b>. Han betaler <b>${F(T)} kr</b> hver måned i <b>2 år</b>.<br>Hvor mye koster lånet ham (det han betaler <i>i tillegg</i> til de 150 000)?`,ans:k,unit:'kr',steps:[`Totalt betalt: ${F(T)} · 24 = ${F(tot)} kr`,`Kostnad: ${F(tot)} − 150 000 = ${F(k)} kr`],wrong:[tot,T*12-150000,k/2]};
+}
+};
+
+function choicesFor(q,count){
+  if(q.choice)return q.choice.options.slice();
+  const d=q.dec||0,out=[fmt(q.ans,d)];
+  const add=v=>{if(!isFinite(v)||v<0||out.length>=count)return;const k=fmt(rd(v,d),d);if(!out.includes(k))out.push(k);};
+  (q.wrong||[]).forEach(add);
+  [1.5,0.5,2,1.2,0.8,1.1,0.9].forEach(m=>add(q.ans*m));
+  for(let k=1;out.length<count&&k<50;k++)add(q.ans+k*(d?Math.pow(10,-d)*5:1));
+  return out.sort(()=>Math.random()-.5);
+}
+function correctKey(q){return q.choice?q.choice.correct:fmt(q.ans,q.dec||0);}
+function parseNum(s){s=String(s).replace(/[\s ]/g,'').replace('−','-').replace(',','.');return s===''?NaN:Number(s);}
+function checkNum(q,s){const x=parseNum(s);if(!isFinite(x))return false;const d=q.dec||0;const tol=q.tol!=null?q.tol:Math.max(Math.abs(q.ans)*0.005,0.5*Math.pow(10,-d)+1e-9);return Math.abs(x-q.ans)<=tol;}
+/*GEN-END*/
+
+/* ---------- Stasjoner og lagring ---------- */
+const IC={
+ lonn:'<circle cx="12" cy="12" r="8.5"/><path d="M9.5 9h3.5a1.6 1.6 0 010 3.2H11a1.6 1.6 0 000 3.3h3.5M12 7.5V9M12 15.5V17"/>',
+ malestokk:'<path d="M3 15l12-12 6 6-12 12z"/><path d="M7 11l2 2M10 8l2 2M13 5l2 2"/>',
+ toleranse:'<path d="M4 3v18M4 6h14l2 3H4M10 9v5M4 14h6"/>',
+ vinkler:'<path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><circle cx="12" cy="12" r="3"/>',
+ moms:'<path d="M3 12l9-9h8v8l-9 9z"/><circle cx="16" cy="8" r="1.6"/>',
+ linear:'<rect x="4" y="4" width="10" height="16" rx="1"/><path d="M14 8h3l2 2v8a2 2 0 01-4 0v-4h-1M7 8h4"/>',
+ prosent:'<path d="M5 19L19 5"/><circle cx="7" cy="7" r="2.3"/><circle cx="17" cy="17" r="2.3"/>',
+ fart:'<path d="M3 18c3-2.5 6 2.5 9 0s6 2.5 9 0M5 14h14l-2-4H8z"/><path d="M12 10V5"/>',
+ formler:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/>',
+ volum:'<path d="M5 6c0-1.7 3.1-3 7-3s7 1.3 7 3v12c0 1.7-3.1 3-7 3s-7-1.3-7-3z"/><path d="M5 6c0 1.7 3.1 3 7 3s7-1.3 7-3"/>',
+ pytagoras:'<path d="M4 20h16L4 6z"/><path d="M4 16h4v4"/>',
+ lan:'<path d="M6 3h9l4 4v14H6z"/><path d="M9 12h7M9 16h7M9 8h3"/>'
+};
+const ST=[
+ {id:'lonn',name:'Lønnsslippen',sub:'Timelønn og penger',del:1},
+ {id:'malestokk',name:'Tegnebordet',sub:'Målestokk',del:1},
+ {id:'toleranse',name:'Dreiebenken',sub:'Toleranser og måleusikkerhet',del:1},
+ {id:'vinkler',name:'Sekskantmutteren',sub:'Vinkler',del:1},
+ {id:'moms',name:'Båtbutikken',sub:'Merverdiavgift (moms)',del:1},
+ {id:'linear',name:'Bensintanken',sub:'Lineære modeller',del:1},
+ {id:'prosent',name:'Delelageret',sub:'Prosent og rabatt',del:2},
+ {id:'fart',name:'Fjordturen',sub:'Fart, tid og forbruk',del:2},
+ {id:'formler',name:'Fresemaskinen',sub:'Formler og omdreiningstall',del:2},
+ {id:'volum',name:'Tank og maling',sub:'Volum og areal',del:2},
+ {id:'pytagoras',name:'Slipprampa',sub:'Pytagoras',del:2},
+ {id:'lan',name:'Båtlånet',sub:'Lån og renter',del:2}
+];
+const BY=Object.fromEntries(ST.map(s=>[s.id,s]));
+const LV=['','Lærling','Svenn','Mester'];
+const LVD=['','Velg svar · 2 forsøk','Velg svar','Skriv svaret selv'];
+const STAGES=[[1,'Skroget er platet opp'],[3,'Sveisesømmene er lagt'],[6,'Rekka er sveiset på'],[9,'Styrepulten er montert'],[12,'Påhengsmotoren henger på'],[16,'Propellen er montert'],[20,'Båten har fått stripe'],[25,'Navnet er malt på'],[30,'Båten er sjøsatt'],[36,'Flagget er heist – klar for eksamen']];
+const EXAM=new Date(2026,10,27);
+
+const KEY='williams-batverksted-v1';
+let S={name:'',stars:{},stats:{},days:{},best:0};
+try{const raw=localStorage.getItem(KEY);if(raw)S=Object.assign(S,JSON.parse(raw));}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+const today=()=>{const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();};
+const totalStars=()=>ST.reduce((a,s)=>a+(S.stars[s.id]||0),0);
+const stageOf=n=>STAGES.filter(s=>n>=s[0]).length;
+const $=id=>document.getElementById(id);
+
+/* ---------- Båten ---------- */
+let BID=0;
+function boatSVG(n){
+  const gid='alu'+(++BID);
+  const st=stageOf(n),on=k=>st>=k,name=(S.name||'').toUpperCase().replace(/[<>&"]/g,'');
+  const y=on(9)?14:0;
+  return `<svg viewBox="0 0 360 200" role="img" aria-label="Båten: ${on(1)?STAGES[st-1][1]:'bare en tegning'}">
+  <defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F3F6F8"/><stop offset="1" stop-color="#93A3AE"/></linearGradient></defs>
+  ${on(9)?'':`<path d="M0 176H360" stroke="#28566F" stroke-width="2"/><path d="M98 176l14-34h18l14 34M216 176l14-38h18l14 38" fill="none" stroke="#9DB6C3" stroke-width="3" stroke-linejoin="round"/>`}
+  ${on(9)?`<path d="M0 156 Q22 150 45 156 T90 156 T135 156 T180 156 T225 156 T270 156 T315 156 T360 156 V200 H0Z" fill="#1E5674"/>`:''}
+  <g class="${on(9)?'bob':''}" transform="translate(0 ${y})">
+   ${on(10)?`<path d="M54 100V48" stroke="#C8D3D9" stroke-width="2"/><rect x="54" y="48" width="26" height="18" fill="#BA0C2F"/><path d="M54 57h26M63 48v18" stroke="#fff" stroke-width="5"/><path d="M54 57h26M63 48v18" stroke="#00205B" stroke-width="2.5"/>`:''}
+   ${on(5)?`<path d="M50 96h-8v8h8" fill="none" stroke="#3A3F44" stroke-width="3"/><rect x="22" y="72" width="26" height="30" rx="7" fill="#2A2F34"/><rect x="26" y="77" width="18" height="4" rx="2" fill="#F2C230"/><rect x="31" y="102" width="8" height="40" fill="#3A3F44"/>`:''}
+   ${on(6)?`<ellipse cx="35" cy="146" rx="3.5" ry="11" fill="#C99A3B"/><circle cx="35" cy="146" r="3" fill="#8A6A22"/>`:''}
+   <path d="M50 100 L318 88 L296 126 Q240 142 140 143 L62 141 Z" fill="${on(1)?`url(#${gid})`:'none'}" stroke="${on(1)?'#5E707B':'#6E8C9C'}" stroke-width="2" ${on(1)?'':'stroke-dasharray="6 5"'}/>
+   ${on(2)?`<path d="M58 121 L305 108 M120 97 L120 142 M190 94 L190 143 M255 91 L256 135" stroke="#6CD3FF" stroke-width="2" stroke-dasharray="2.5 2" fill="none"/>`:''}
+   ${on(7)?`<path d="M53 106 L312 94 L309 101 L55 114Z" fill="#F2C230"/>`:''}
+   ${on(3)?`<path d="M56 90 L300 79" stroke="#DCE4E8" stroke-width="3" fill="none"/><path d="M80 89v10M140 86v11M200 84v10M260 81v10" stroke="#DCE4E8" stroke-width="2.5"/>`:''}
+   ${on(4)?`<rect x="166" y="70" width="34" height="25" rx="2" fill="#D6DEE3" stroke="#5E707B" stroke-width="1.5"/><path d="M169 70 L177 54 L198 54 L199 70Z" fill="rgba(108,211,255,.45)" stroke="#5E707B" stroke-width="1.5"/>`:''}
+   ${on(8)&&name?`<text x="160" y="133" text-anchor="middle" font-family="Big Shoulders Stencil Display, Impact, sans-serif" font-weight="800" font-size="16" fill="#0C2230" letter-spacing="1">${name}</text>`:''}
+  </g>
+  ${on(1)?'':`<text x="180" y="40" text-anchor="middle" font-family="Atkinson Hyperlegible, sans-serif" font-size="14" fill="#9DB6C3">Tegning – venter på første stjerne</text>`}
+ </svg>`;
+}
+
+/* ---------- Visning ---------- */
+let tab='home';
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.hidden=s.id!=='s-'+id);$('nav').hidden=!['home','boat','tools'].includes(id);window.scrollTo(0,0);}
+function starIcon(on){return `<svg class="s" viewBox="0 0 24 24"><path d="M12 2.5l2.9 6 6.6.8-4.9 4.5 1.3 6.5L12 17l-5.9 3.3 1.3-6.5L2.5 9.3l6.6-.8z" fill="${on?'currentColor':'none'}" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>`;}
+
+function nextJob(){
+  for(const L of [1,2,3])for(const s of ST)if((S.stars[s.id]||0)<L)return {st:s.id,L};
+  return {st:P(ST).id,L:3};
+}
+function renderHome(){
+  const now=new Date();now.setHours(0,0,0,0);const d=Math.round((EXAM-now)/864e5);
+  $('days').textContent=d>0?d:(d===0?'I dag':'–');$('days-l').textContent=d>1?'dager igjen':d===1?'dag til eksamen':d===0?'er eksamensdagen':'eksamen er over';
+  const n=totalStars();$('home-boat').innerHTML=boatSVG(n);$('h-stars').textContent=n;$('h-bar').style.width=(n/36*100)+'%';
+  const nx=STAGES.find(s=>n<s[0]);$('h-next').textContent=nx?`Neste del: ${nx[1].toLowerCase()} ved ${nx[0]} stjerner`:'Båten er ferdig. Fortsett med prøveeksamen.';
+  const t=S.days[today()]||0;$('shift').innerHTML='Dagens skift '+[0,1,2].map(i=>`<i class="${i<t?'on':''}"></i>`).join('');
+  const j=nextJob();$('gn-t').textContent=t===0?'Start dagens skift':'Neste jobb';$('gn-s').textContent=`${BY[j.st].name} · ${LV[j.L]}`;
+  for(const del of [1,2]){
+    $('st-d'+del).innerHTML=ST.filter(s=>s.del===del).map(s=>{const got=S.stars[s.id]||0;
+      return `<div class="st"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${IC[s.id]}</svg></div>
+      <h3>${s.name}</h3><div class="sub">${s.sub}</div>
+      <div class="lvls">${[1,2,3].map(L=>{const lock=L>got+1;return `<button class="lv ${got>=L?'done':''} ${lock?'locked':''}" data-st="${s.id}" data-l="${L}" ${lock?'aria-disabled="true"':''}>${starIcon(got>=L)}${LV[L]}</button>`;}).join('')}</div></div>`;}).join('');
+  }
+}
+function renderBoat(){
+  const n=totalStars();$('b-name').textContent=S.name||'Båten';$('b-stars').textContent=n;$('big-boat').innerHTML=boatSVG(n);
+  $('parts').innerHTML=STAGES.map(s=>`<div class="part ${n>=s[0]?'on':'off'}"><span>${n>=s[0]?'✓ ':''}${s[1]}</span><b>${s[0]} ★</b></div>`).join('');
+  $('stats').innerHTML=ST.map(s=>{const t=S.stats[s.id];return `<span>${s.sub}</span><span>${t&&t.q?`${t.c} av ${t.q} (${Math.round(t.c/t.q*100)} %)`:'ikke prøvd'}</span>`;}).join('')+(S.best?`<span><b>Beste prøveeksamen</b></span><span>${S.best} av 10</span>`:'');
+}
+function renderTools(){
+  const f=[
+   ['Eksamenstips',`<ul class="tips"><li>Del 1 (1 time): bare blyant og linjal. Del 2 (3 timer): kalkulator og GeoGebra er lov, ikke KI.</li><li>Vis alltid hvordan du regner. Sensor gir poeng for utregningen, også om svaret blir feil.</li><li>Skriv svaret med enhet (kr, mm, liter, km/h).</li><li>Les oppgaven to ganger. Strek under tallene.</li><li>Prøv og feil er lov, men vis systemet.</li><li>Sjekk om svaret er fornuftig. En båttur på 70 000 km/h er ikke det.</li></ul>`],
+   ['Lønn','<p><code>lønn = timer · timelønn</code></p><p><code>timer = lønn : timelønn</code></p><p>4 timer à 150 kr = 600 kr</p>'],
+   ['Målestokk','<p><code>1 : 3</code> → tegningen er 3 ganger mindre. Del på 3.</p><p><code>2 : 1</code> → tegningen er 2 ganger større. Gang med 2.</p><p>120 mm i 1 : 3 = 40 mm</p>'],
+   ['Toleranse','<p>Ø 65 ± 0,3 → minste 64,7 og største 65,3.</p><p>Målt verdi mellom grensene = godkjent.</p>'],
+   ['Vinkler','<p>Trekant: <code>180°</code>. Firkant: <code>360°</code>.</p><p>Mangekant: <code>(hjørner − 2) · 180°</code></p><p>Sekskantmutter: 720° : 6 = <b>120°</b> i hvert hjørne.</p>'],
+   ['Moms 25 %','<p>Uten moms → moms: <code>del på 4</code></p><p>Med moms → moms: <code>del på 5</code></p><p>Med moms → uten moms: <code>del på 1,25</code></p><p>Uten moms → med moms: <code>gang med 1,25</code></p>'],
+   ['Lineær modell','<p><code>V = 60 − 8 · t</code>: start på 60, går ned 8 hver time.</p><p>Når er den 0? <code>60 : 8</code></p>'],
+   ['Prosent','<p><code>x % av y = y · x : 100</code></p><p>20 % ned → gang med <code>0,80</code>. 20 % opp → gang med <code>1,20</code>.</p><p>Prosentvis endring: <code>endring : gammel · 100</code></p>'],
+   ['Fart og tid','<p><code>fart = strekning : tid</code></p><p>Minutter til timer: <code>del på 60</code>. 16 min = 0,27 t (ikke 0,16!)</p>'],
+   ['Fresing','<p><code>n = v · 1000 : (π · d)</code></p><p><code>v = n · π · d : 1000</code></p><p>Velg innstillingen rett under svaret når v er en makshastighet.</p>'],
+   ['Volum og maling','<p>Kasse: <code>l · b · h</code>. Sylinder: <code>π · r² · l</code> (r = halve diameteren!)</p><p>1 dm³ = 1 liter. 1 m³ = 1000 liter.</p><p>Liter maling = <code>areal : dekkevne</code>. Bokser rundes alltid <b>opp</b>.</p>'],
+   ['Pytagoras','<p><code>c² = a² + b²</code> (c er den lengste siden, mot den rette vinkelen)</p><p>3, 4 og 5 er lurt å huske: 3² + 4² = 25 = 5²</p>'],
+   ['Lån','<p>Renter per måned: <code>restlån · rente : 100 : 12</code></p><p><code>avdrag = terminbeløp − renter − gebyr</code></p><p><code>nytt restlån = restlån − avdrag</code></p><p>Totalt betalt: <code>terminbeløp · antall terminer</code></p>']
+  ];
+  $('formulas').innerHTML=f.map(x=>`<div class="fcard"><h3>${x[0]}</h3>${x[1]}</div>`).join('');
+}
+function goTab(t){tab=t;hideFb();closeCalc();document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('on',b.dataset.tab===t));if(t==='home')renderHome();if(t==='boat')renderBoat();if(t==='tools')renderTools();show(t);}
+
+/* ---------- Runde ---------- */
+let RD=null;
+function startRound(st,L){RD={mode:'st',st,L,n:5,i:0,ok:0,res:[],combo:0};nextQ();show('round');}
+function startExam(){
+  const d1=ST.filter(s=>s.del===1).sort(()=>Math.random()-.5).slice(0,5),d2=ST.filter(s=>s.del===2).sort(()=>Math.random()-.5).slice(0,5);
+  RD={mode:'exam',plan:[...d1.map(s=>({st:s.id,L:P([2,3])})),...d2.map(s=>({st:s.id,L:P([2,3])}))],n:10,i:0,ok:0,res:[],combo:0,miss:[]};nextQ();show('round');
+}
+function nextQ(){
+  hideFb();closeCalc();
+  if(RD.i>=RD.n)return finish();
+  const it=RD.mode==='exam'?RD.plan[RD.i]:{st:RD.st,L:RD.L};
+  RD.cur=it;RD.q=GEN[it.st](it.L);RD.tries=0;RD.hint=0;RD.done=false;
+  RD.input=RD.mode==='exam'||it.L===3;
+  renderQ();
+}
+function renderQ(){
+  const s=BY[RD.cur.st],q=RD.q;
+  $('pips').innerHTML=Array.from({length:RD.n},(_,i)=>`<i class="${i<RD.res.length?(RD.res[i]?'ok':'no'):i===RD.i?'cur':''}"></i>`).join('');
+  $('combo').textContent=RD.combo>=2?'×'+RD.combo:'';
+  $('r-title').textContent=RD.mode==='exam'?`Prøveeksamen · ${RD.i<5?'Del 1':'Del 2'}`:`${s.name} · ${LV[RD.L]}`;
+  const tg=$('r-tag');tg.className='tag '+(s.del===1?'d1':'d2');tg.textContent=s.del===1?'Uten kalkulator':'Kalkulator lov';
+  $('q-text').innerHTML=q.text;$('q-steps').innerHTML='';
+  S.seen=S.seen||{};const sk=RD.cur.st+RD.cur.L;RD.tipShown=RD.mode!=='exam'&&(S.seen[sk]||0)<4;
+  $('q-tip').innerHTML=RD.tipShown?tipHTML(q):'';
+  const tools=[`<button class="tool" id="t-read"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9a4 4 0 010 6M18.5 6.5a7.5 7.5 0 010 11"/></svg>Les opp</button>`];
+  if(RD.mode!=='exam'&&!RD.tipShown)tools.push(`<button class="tool" id="t-tip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 00-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 005.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/></svg>Huskeregel</button>`);
+  if(RD.mode!=='exam')tools.push(`<button class="tool" id="t-hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4M12 3a6 6 0 00-4 10.5c.7.7 1 1.5 1 2.5h6c0-1 .3-1.8 1-2.5A6 6 0 0012 3z"/></svg>Vis ett steg</button>`);
+  if(s.del===2)tools.push(`<button class="tool" id="t-calc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 12h2M14 12h2M8 16h2M14 16h2"/></svg>Kalkulator</button>`);
+  $('q-tools').innerHTML=tools.join('');
+  $('t-read').onclick=()=>speak((RD.tipShown&&q.tip?q.tip.replace('</strong>','. ')+'. ':'')+q.text);
+  if($('t-hint'))$('t-hint').onclick=showHint;
+  if($('t-tip'))$('t-tip').onclick=()=>{$('q-tip').innerHTML=tipHTML(q);$('t-tip').remove();};
+  if($('t-calc'))$('t-calc').onclick=openCalc;
+  const A=$('answers');
+  if(q.choice||!RD.input){
+    const opts=choicesFor(q,RD.cur.L===1?3:4);
+    A.innerHTML=opts.map(o=>`<button class="opt">${o}${q.choice||!q.unit?'':' <span style="font-size:18px;color:var(--mute)">'+q.unit+'</span>'}</button>`).join('');
+    A.querySelectorAll('.opt').forEach((b,i)=>b.onclick=()=>pick(b,opts[i]));
+  }else{
+    A.innerHTML=`<div class="inrow"><input id="ans" inputmode="decimal" autocomplete="off" placeholder="Svar"><span class="unit">${q.unit||''}</span></div>
+      <button class="btn sig full" id="check">Sjekk svaret</button><div class="hint-small">Skriv bare tallet. Bruk komma for desimaler.</div>`;
+    $('check').onclick=()=>{const v=$('ans').value;if(v.trim()==='')return $('ans').focus();submit(checkNum(q,v));};
+    $('ans').addEventListener('keydown',e=>{if(e.key==='Enter')$('check').click();});
+  }
+}
+function tipHTML(q){if(!q.tip)return '';const [r,x]=q.tip.split('</strong>');return `<div class="tipbox"><span>Mesterens huskeregel</span>${r}</strong><div>${x||''}</div></div>`;}
+function showHint(){const q=RD.q;if(RD.hint>=q.steps.length)return;RD.hint++;renderSteps(RD.hint,false);}
+function renderSteps(k,withAns){const q=RD.q;$('q-steps').innerHTML=q.steps.slice(0,k).map(s=>`<li>${s}</li>`).join('')+(withAns?`<li class="ans">Svar: ${correctKey(q)}${q.choice?'':' '+(q.unit||'')}</li>`:'');}
+function pick(btn,val){
+  if(RD.done)return;
+  const ok=val===correctKey(RD.q);
+  if(ok){btn.classList.add('ok');return submit(true,btn);}
+  if(RD.cur.L===1&&RD.mode!=='exam'&&RD.tries===0){
+    RD.tries=1;btn.classList.add('no');btn.disabled=true;
+    if(RD.hint<1){RD.hint=1;renderSteps(1,false);}
+    toast('Ikke helt','Prøv en gang til. Se tipset på platen.');return;
+  }
+  submit(false,btn);
+}
+function submit(ok,btn){
+  if(RD.done)return;RD.done=true;
+  const id=RD.cur.st;S.stats[id]=S.stats[id]||{q:0,c:0};S.stats[id].q++;if(ok)S.stats[id].c++;save();
+  S.seen=S.seen||{};if(RD.mode!=='exam'){const sk=RD.cur.st+RD.cur.L;S.seen[sk]=(S.seen[sk]||0)+1;}save();
+  RD.res.push(ok);if(ok){RD.ok++;RD.combo++;}else{RD.combo=0;if(RD.miss)RD.miss.push(id);}
+  $('pips').children[RD.i].className=ok?'ok':'no';$('combo').textContent=RD.combo>=2?'×'+RD.combo:'';
+  if(ok){sparks(btn||$('check')||$('plate'));beep(true);
+    const cheer=['Rett! Fin sveis.','Sitter som en mutter.','Rett på målet.','Full gass!','Innenfor toleransen.','Spikret.'];
+    let p=RD.combo>=3?`${RD.combo} på rad! Du er i flytsonen.`:'Bra jobba.';
+    if(RD.hint>0&&RD.mode!=='exam')p='Du brukte tips og fikk det til. Sånn lærer man.';
+    showFb(true,P(cheer),p);
+  }else{
+    renderSteps(RD.q.steps.length,true);
+    if(!RD.input||RD.q.choice)document.querySelectorAll('.opt').forEach(b=>{if(b.textContent.trim().startsWith(correctKey(RD.q)))b.classList.add('ok');b.disabled=true;});
+    showFb(false,'Nesten!','Se utregningen på platen. Neste oppgave får nye tall.');
+  }
+  RD.i++;
+}
+function showFb(good,t,p){const f=$('fb');f.className='fb show '+(good?'good':'bad');$('fb-t').textContent=t;$('fb-p').textContent=p;$('fb-go').textContent=RD.i+1>=RD.n?'Se resultatet':'Neste oppgave';$('fb-go').hidden=false;}
+let toastT;function toast(t,p){const f=$('fb');f.className='fb show bad';$('fb-t').textContent=t;$('fb-p').textContent=p;$('fb-go').hidden=true;clearTimeout(toastT);toastT=setTimeout(hideFb,2200);}
+function hideFb(){$('fb').className='fb';}
+$('fb-go').onclick=nextQ;
+
+function finish(){
+  S.days[today()]=(S.days[today()]||0)+1;
+  const before=totalStars();let html='';
+  if(RD.mode==='exam'){
+    if(RD.ok>(S.best||0))S.best=RD.ok;save();
+    const weak=[...new Set(RD.miss)].map(id=>BY[id].sub);
+    html=`<span class="eyebrow">Prøveeksamen ferdig</span><h2>${RD.ok} av 10</h2>
+    <p class="score">${RD.ok>=8?'Dette er sterkt. Du er klar.':RD.ok>=5?'Godt jobbet. Over halvparten riktig på eksamenstempo.':'Du gjennomførte hele. Det er det viktigste første gang.'}</p>
+    ${weak.length?`<div class="weak"><b style="color:var(--text)">Tren mer på:</b><br>${weak.join('<br>')}</div>`:''}
+    <button class="btn sig full" id="res-again">Ny prøveeksamen</button><button class="btn ghost full" id="res-home">Tilbake til verkstedet</button>`;
+  }else{
+    const pass=RD.ok>=3,had=S.stars[RD.st]||0;
+    if(pass&&RD.L>had)S.stars[RD.st]=RD.L;save();
+    const after=totalStars(),newSt=stageOf(after)>stageOf(before);
+    html=`<span class="eyebrow">${BY[RD.st].name} · ${LV[RD.L]}</span>
+    <h2>${pass?(RD.ok===5?'Perfekt!':'Runden er bestått'):'Godt forsøk'}</h2>
+    <div class="rstars" style="color:var(--sig)">${[1,2,3].map(L=>starIcon((S.stars[RD.st]||0)>=L).replace('class="s"','')).join('')}</div>
+    <p class="score">${RD.ok} av 5 riktige${pass?'':'. Du trenger 3 for stjerne.'}</p>
+    ${newSt?`<div class="newpart"><b>Ny del på båten!</b><span>${STAGES[stageOf(after)-1][1]}</span>${boatSVG(after)}</div>`:''}
+    ${!pass?`<p style="margin:0;font-size:17px;color:var(--mute)">Hvert forsøk gjør deg bedre. Ta en ny runde med nye tall${RD.L>1?', eller gå ett nivå ned':''}.</p>`:''}
+    ${pass&&RD.L<3?`<button class="btn sig full" id="res-up">Prøv ${LV[RD.L+1]}-nivå</button>`:''}
+    <button class="btn ${pass&&RD.L<3?'ghost':'sig'} full" id="res-again">En runde til</button>
+    ${!pass&&RD.L>1?`<button class="btn ghost full" id="res-down">Gå til ${LV[RD.L-1]}</button>`:''}
+    <button class="btn ghost full" id="res-home">Tilbake til verkstedet</button>`;
+    if(pass){setTimeout(()=>{for(let k=0;k<3;k++)setTimeout(()=>sparks(document.querySelector('.rstars')),k*250);beep(true);},150);}
+  }
+  $('result').innerHTML=html;show('result');
+  const st=RD.st,L=RD.L,m=RD.mode;
+  $('res-again').onclick=()=>m==='exam'?startExam():startRound(st,L);
+  $('res-home').onclick=()=>goTab('home');
+  if($('res-up'))$('res-up').onclick=()=>startRound(st,L+1);
+  if($('res-down'))$('res-down').onclick=()=>startRound(st,L-1);
+}
+
+/* ---------- Effekter ---------- */
+function sparks(el){if(!el)return;const r=el.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;
+  for(let i=0;i<18;i++){const s=document.createElement('i');s.className='spark'+(i%3?'':' y');const a=Math.random()*Math.PI*2,d=40+Math.random()*90;
+    s.style.left=cx+'px';s.style.top=cy+'px';s.style.setProperty('--dx',Math.cos(a)*d+'px');s.style.setProperty('--dy',Math.sin(a)*d+'px');document.body.appendChild(s);setTimeout(()=>s.remove(),750);}}
+let AC;function beep(good){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain();o.type='triangle';o.frequency.setValueAtTime(good?660:220,AC.currentTime);if(good)o.frequency.exponentialRampToValueAtTime(1320,AC.currentTime+.12);g.gain.setValueAtTime(.08,AC.currentTime);g.gain.exponentialRampToValueAtTime(.0001,AC.currentTime+.25);o.connect(g).connect(AC.destination);o.start();o.stop(AC.currentTime+.26);}catch(e){}}
+function speak(html){try{const t=html.replace(/<br>/g,'. ').replace(/<tr>/g,'. ').replace(/<[^>]+>/g,' ').replace(/ · /g,' ganger ').replace(/ : /g,' delt på ').replace(/−/g,' minus ').replace(/²/g,' i andre').replace(/π/g,'pi').replace(/Ø/g,'diameter ').replace(/±/g,'pluss minus ').replace(/°/g,' grader').replace(/ /g,'');
+  speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='nb-NO';u.rate=.92;const v=speechSynthesis.getVoices().find(v=>/^(nb|no|nn)/i.test(v.lang));if(v)u.voice=v;speechSynthesis.speak(u);}catch(e){}}
+
+/* ---------- Kalkulator ---------- */
+let CE='';
+const KEYS=['7','8','9','÷','⌫','4','5','6','×','(','1','2','3','−',')','0',',','π','+','x²','C','√','Ans','=',''];
+let ANS=0;
+$('keys').innerHTML=KEYS.filter(k=>k).map(k=>`<button class="${'÷×−+'.includes(k)&&k.length===1?'op':''} ${k==='='?'eq':''}" data-k="${k}">${k}</button>`).join('');
+$('keys').onclick=e=>{const b=e.target.closest('button');if(!b)return;const k=b.dataset.k;
+  if(k==='C')CE='';else if(k==='⌫')CE=CE.slice(0,-1);else if(k==='=')return calcEval(true);else if(k==='x²')CE+='²';else if(k==='√')CE+='√(';else if(k==='Ans')CE+='Ans';else CE+=k;
+  $('c-e').textContent=CE||' ';calcEval(false);};
+function calcEval(fin){
+  let s=CE.replace(/Ans/g,'('+ANS+')').replace(/×/g,'*').replace(/÷/g,'/').replace(/−/g,'-').replace(/,/g,'.').replace(/π/g,'(Math.PI)').replace(/²/g,'**2').replace(/√\(/g,'Math.sqrt(');
+  const opens=(s.match(/\(/g)||[]).length-(s.match(/\)/g)||[]).length;if(opens>0)s+=')'.repeat(opens);
+  if(!/^[\d+\-*/().\s]*$/.test(s.replace(/Math\.(PI|sqrt)/g,'')))return;
+  try{const v=Function('"use strict";return ('+(s||'0')+')')();if(isFinite(v)){$('c-r').textContent=fmt(v,Number.isInteger(rd(v,6))?0:4).replace(/,?0+$/,m=>m.startsWith(',')?'':m);if(fin){ANS=v;CE='';$('c-e').textContent='= '+$('c-r').textContent;}}}catch(e){if(fin)$('c-r').textContent='Feil';}
+}
+function openCalc(){$('calc').classList.add('show');}
+function closeCalc(){$('calc').classList.remove('show');}
+$('calc-x').onclick=closeCalc;
+
+/* ---------- Oppstart ---------- */
+document.addEventListener('click',e=>{const b=e.target.closest('.lv');if(!b)return;if(b.getAttribute('aria-disabled')){b.animate([{transform:'translateX(-4px)'},{transform:'translateX(4px)'},{transform:'none'}],{duration:200});return;}startRound(b.dataset.st,+b.dataset.l);});
+$('go-next').onclick=()=>{const j=nextJob();startRound(j.st,j.L);};
+$('go-exam').onclick=startExam;
+$('r-x').onclick=()=>{hideFb();closeCalc();goTab('home');};
+document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>goTab(b.dataset.tab));
+$('w-go').onclick=()=>{S.name=($('boatname').value.trim()||'Havørn').slice(0,14);save();startRound('lonn',1);};
+if(!S.name){$('w-boat').innerHTML=boatSVG(0);show('welcome');$('nav').hidden=true;}else goTab('home');
+</script>
+
+</body>
+</html>
